@@ -19,6 +19,7 @@ Please visit our [online documentation](http://labs.hyperledger.org/orion-server
 
 In addition, the [Go SDK repository](https://github.com/hyperledger-labs/orion-sdk-go) contains examples and tutorials.
 
+## REST API Reference
 
 ## How to Contribute
 We will be happy to receive help! In order to become an Orion contributor, please contact the project [maintainers](MAINTAINERS.md).
