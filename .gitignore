@@ -24,3 +24,5 @@ cmd/bdb/bdb
 node_modules
 ledger
 
+
+client-api/operations/bitnami/

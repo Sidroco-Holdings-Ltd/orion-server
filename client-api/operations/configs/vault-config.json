@@ -1,0 +1,23 @@
+{
+  "storage": {
+    "s3": {
+      "access_key": "myminioadmin",
+      "secret_key": "myminioadmin",
+      "bucket": "vault-bucket",
+      "endpoint": "http://minio:9000",
+      "s3_force_path_style": true
+    }
+  },
+  "listener": [
+    {
+      "tcp": {
+        "address": "0.0.0.0:9200",
+        "tls_disable": true
+      }
+    }
+  ],
+  "default_lease_ttl": "168h",
+  "max_lease_ttl": "720h",
+  "cluster_name": "vault-cluster",
+  "ui": true
+}
