@@ -1,0 +1,66 @@
+version: '3.8'
+
+# 3-node Orion Raft cluster configuration
+# Each node has its own ledger and configuration
+
+services:
+  orion-server1:
+    image: orionbcdb/orion-server
+    container_name: orion-server1
+    hostname: orion-server1
+    ports:
+      - "6001:6001"  # Client API for node 1
+      - "7051:7050"  # Raft peer port for node 1
+    volumes:
+      - ../deployment/crypto:/etc/orion-server/crypto:ro
+      - ../ledger/node1:/var/orion-server/ledger
+      - ../deployment/config-docker:/etc/orion-server/config:ro
+    environment:
+      - BCDB_CONFIG_PATH=/etc/orion-server/config/config-server1.yml
+    command: ["bdb", "start", "--configpath", "/etc/orion-server/config/config-server1.yml"]
+    networks:
+      - orion-network
+
+  orion-server2:
+    image: orionbcdb/orion-server
+    container_name: orion-server2
+    hostname: orion-server2
+    ports:
+      - "6002:6001"  # Client API for node 2
+      - "7052:7050"  # Raft peer port for node 2
+    volumes:
+      - ../deployment/crypto:/etc/orion-server/crypto:ro
+      - ../ledger/node2:/var/orion-server/ledger
+      - ../deployment/config-docker:/etc/orion-server/config:ro
+    environment:
+      - BCDB_CONFIG_PATH=/etc/orion-server/config/config-server2.yml
+    command: ["bdb", "start", "--configpath", "/etc/orion-server/config/config-server2.yml"]
+    networks:
+      - orion-network
+
+  orion-server3:
+    image: orionbcdb/orion-server
+    container_name: orion-server3
+    hostname: orion-server3
+    ports:
+      - "6003:6001"  # Client API for node 3
+      - "7053:7050"  # Raft peer port for node 3
+    volumes:
+      - ../deployment/crypto:/etc/orion-server/crypto:ro
+      - ../ledger/node3:/var/orion-server/ledger
+      - ../deployment/config-docker:/etc/orion-server/config:ro
+    environment:
+      - BCDB_CONFIG_PATH=/etc/orion-server/config/config-server3.yml
+    command: ["bdb", "start", "--configpath", "/etc/orion-server/config/config-server3.yml"]
+    networks:
+      - orion-network
+
+networks:
+  orion-network:
+    driver: bridge
+
+# Volumes for persistent storage (optional, can be used instead of bind mounts)
+# volumes:
+#   node1-ledger:
+#   node2-ledger:
+#   node3-ledger:

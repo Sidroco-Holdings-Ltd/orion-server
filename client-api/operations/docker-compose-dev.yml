@@ -1,0 +1,77 @@
+version: '3.8'
+
+# Client API development environment
+# Mounts the backend directory for live development
+
+services:
+  client-api:
+    image: node:22-alpine3.23
+    container_name: orion-client-api
+    hostname: client-api
+    working_dir: /app
+    ports:
+      - "4001:4001"  # Client API port
+    volumes:
+      # Mount the backend directory for development
+      - ../backend:/app
+    # environment:
+    #   - NODE_ENV=development
+    #   - PORT=4001
+    #   - CLIENT_NAME=orion-client
+    command: sh -c "corepack enable && yarn install && yarn dev"
+    networks:
+      - orion-network
+    restart: unless-stopped
+
+  minio:
+    image: 'bitnamilegacy/minio:2025.7.23-debian-12-r5'
+    container_name: minio_local
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=myminioadmin
+      - MINIO_ROOT_PASSWORD=myminioadmin
+      - MINIO_DEFAULT_BUCKETS=vault-bucket
+    volumes:
+      - ./bitnami/minio/data:/bitnami/minio/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s  # Wait a bit before starting healthchecks
+    networks:
+      - orion-network
+
+  vault:
+    image: bitnamilegacy/vault:1.20.2-debian-12-r2
+    container_name: vault
+    ports:
+      - '9200:9200'
+      - '8200:8200'
+    environment:
+      # - VAULT_DEV_ROOT_TOKEN_ID=root  # Only for development. Use proper authentication for production.
+      - VAULT_ADDR=http://vault:9200
+      # - VAULT_TOKEN=root
+    volumes:
+      - ./configs/vault-config.json:/opt/bitnami/vault/config/vault-config.json
+      - ./configs/transit-vault-policy.hcl:/opt/bitnami/vault/config/transit-vault-policy.hcl
+    cap_add:
+      - IPC_LOCK
+    command: server -dev -dev-root-token-id=root -dev-no-store-token=true -config=/opt/bitnami/vault/config/vault-config.json  # Development mode for testing. Use proper server config for production.
+    # command: server -config=/opt/bitnami/vault/config/vault-config.json  # Development mode for testing. Use proper server config for production.
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - orion-network
+  
+
+networks:
+  orion-network:
+    driver: bridge
+
+volumes:
+  # Named volume for node_modules to avoid performance issues with bind mounts
+  client-api-node-modules:
